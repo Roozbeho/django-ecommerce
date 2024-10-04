@@ -2,20 +2,19 @@ from basket.basket import Basket
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Prefetch
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
-from order.models import Order, OrderItem
+from order.models import Order
 from shop.models import Product
 
 from .forms import (AccountVerificationForm, AddressForm, LoginForm,
                     RegistrationForm)
 from .models import Address, OtpCode
-
 
 class VerificationAccountRequiredMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
@@ -140,7 +139,7 @@ class WishListView(VerificationAccountRequiredMixin, ListView):
     context_object_name = "favorite"
 
     def get_queryset(self):
-        return self.request.user.wishlist_products.all()
+        return self.request.user.wishlist_products.all().prefetch_related('product_images')
 
 
 class ChangeWishListView(LoginRequiredMixin, View):

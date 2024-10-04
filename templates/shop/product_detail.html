@@ -5,6 +5,7 @@
     <div class="row d-flex justify-content-center">
         <div class="col-md-10">
             <div class="card">
+                {% for product in products %}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="images p-3">
@@ -62,6 +63,7 @@
 
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -100,7 +102,7 @@
     <div class="container my-5 py-5 text-body">
         <div class="row d-flex justify-content-center">
             <div class="col-md-11 col-lg-9 col-xl-7">
-                {% for review in product.reviews.all %}
+                {% for review in reviews %}
                 <div class="d-flex flex-start mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" width="55" height="55" fill="currentColor" class="rounded-circle shadow-1-strong me-3 bi bi-person-fill" viewBox="0 0 16 16">
                         <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
@@ -113,13 +115,13 @@
                                         <h5>{{ review.customer.username }}</h5>
                                     </div>
                                     <div class="col-6 text-success text-end">
-                                        {% with buyer=review.is_buyer  %}
-                                            {% if buyer %}
+                                        {% comment %} {% with buyer=review.is_buyer  %} {% endcomment %}
+                                            {% if review.is_buyer  %}
                                                 <p class="text-success">Buyer</p>
                                             {% else %}
                                                 <p class="text-danger">Not Buyer</p>
                                             {% endif %}
-                                        {% endwith %}
+                                        {% comment %} {% endwith %} {% endcomment %}
                                     </div>
                                 </div>
                                 <p class="small">{{ review.created_at|time:'h:i' }} - {{ review.created_at|date:'Y/m/d' }}</p>
@@ -142,10 +144,22 @@
                 </div>
                 {% endfor %}
                 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                <a class="btn btn-outline-primary col-3" href="{% url 'shop:create_review' product.slug %}">
+                <a class="btn btn-outline-primary col-3" href="{% url 'shop:create_review' reviews.first.product.slug %}">
                     Add Review
-                </a>
-
+                </a><br><br>
+                <div class="pagination">
+                    <span class="page-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}">Newer Comments</a>
+                        {% endif %}
+                        <span class="page-current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">Older Comments</a>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
         </div>
     </div>

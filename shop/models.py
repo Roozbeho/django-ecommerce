@@ -171,7 +171,7 @@ class Review(TimestampAbstract):
 
         its prevent customer from reviewing a product more than once
         """
-        if Review.objects.filter(Q(customer=customer)&Q(product=product)).exists():
+        if Review.objects.filter(Q(customer=customer)&Q(product=product)&Q(is_active=True)).exists():
             return False
         return True
 
