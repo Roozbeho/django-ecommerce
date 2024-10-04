@@ -1,0 +1,177 @@
+{% include "base.html" %}
+
+{% comment %} {% block title %}Payment{% endblock title %} {% endcomment %}
+
+{% block content %}
+<section>
+
+
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div class="d-flex flex-row align-items-center">
+                {% comment %} <h4 class="text-uppercase mt-1">Eligible</h4> {% endcomment %}
+                {% comment %} <span class="ms-2 me-3">Pay</span> {% endcomment %}
+            </div>
+            <a href="/">Cancel and return to the website</a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7 col-lg-7 col-xl-6 mb-4 mb-md-0">
+                <h5 class="mb-3">Delivery option details</h5>
+                <div>
+                    <p>
+                        delivery type : <b>{{ delivery_option.delivery_type }}</b>
+                    </p>
+                    <p>
+                        it will deliverd in <b>{{ delivery_option.deliverd_time }}</b>
+                    </p>
+
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-3">Delivery address details</h5>
+                    </div>
+                    <p>
+                        Full Name : {{ delivery_address.first_name }} {{ delivery_address.last_name }}
+                    </p>
+                    <p>
+                        Postal Code : {{ delivery_address.postal_code }}
+                    </p>
+                    <p>
+                        {{ delivery_address.state }} - {{ delivery_address.city }}
+                    </p>
+                    <p>
+                        Address Details : <br>
+                        {{ delivery_address.address_line_1 }} <br>
+                        {{ delivery_address.address_line_2}}
+                    </p>
+                    <hr>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button class="btn btn-primary">Submit</button>
+                    </form>
+                    <br><br>
+                    <div class="d-flex flex-column mb-3">
+                        <div class="btn-group-vertical" role="group" aria-label="Vertical button group" id="paypal-button-container">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 col-lg-4 col-xl-4 offset-lg-1 offset-xl-2">
+                <div class="p-3" style="background-color: #eee;">
+                    <span class="fw-bold">Basket Detail</span>
+                    <br><br>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Basket price</span> <span>${{ basket.get_total_price_before_discount}}</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Delivery price</span> <span>${{ basket.session.delivery_option.price }}</span>
+                    </div>
+                    <hr />
+                    {% if basket.session.coupon %}
+                    <div class="d-flex justify-content-between mt-2">
+                        <span class="lh-sm">Coupon Discount<br />
+                        </span>
+                        {% if basket.session.coupon.discount_type == 'percentage' %}
+                        <span>% {{ basket.session.coupon.discount_amount|floatformat:0 }}</span>
+                        {% else %}
+                        <span>$ {{ basket.session.coupon.discount_amount }}</span>
+                        {% endif %}
+                    </div>
+                    <hr />
+                    {% endif %}
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Total </span> <span class="text-success">$ {{ basket.get_final_price|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script
+  src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=USD" 
+  data-sdk-integration-source="button-factory">
+</script>
+
+<script>
+  // تابع برای دریافت CSRF token از کوکی‌ها
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  var csrftoken = getCookie('csrftoken');
+
+  // تابع برای مقداردهی اولیه دکمه PayPal
+  function initPayPalButton() {
+    paypal.Buttons({
+      style: {
+        shape: 'rect',
+        color: 'gold',
+        layout: 'vertical',
+        label: 'paypal',
+      },
+
+      // ایجاد سفارش
+      createOrder: function (data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            "amount": {
+              "currency_code": "USD",
+              "value": '{{ basket.get_final_price }}' // اطمینان از مقدار صحیح عددی
+            }
+          }]
+        });
+      },
+
+      // پس از تأیید پرداخت
+      onApprove: function (data, actions) {
+        var url = "{% url 'order:payment_complete' %}";
+        return fetch(url, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'X-CSRFToken': csrftoken, // ارسال CSRF token
+          },
+          body: JSON.stringify({
+            orderID: data.orderID
+          })
+        }).then(function (response) {
+          if (response.ok) { // بررسی موفقیت آمیز بودن پاسخ
+            location.href = '{% url "order:payment_successful" %}'; // ریدایرکت به صفحه موفقیت پرداخت
+          } else {
+            console.error('Payment approval failed:', response);
+          }
+        }).catch(function (error) {
+          console.error('Fetch error:', error);
+        });
+      },
+
+      // مدیریت خطاها
+      onError: function (err) {
+        console.error('PayPal Button Error:', err);
+      }
+    }).render('#paypal-button-container');
+  }
+
+  // مقداردهی اولیه
+  initPayPalButton();
+</script>
+
+
+{% endblock content %}

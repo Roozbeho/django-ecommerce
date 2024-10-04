@@ -1,0 +1,11 @@
+{% include "base.html" %}
+
+{% block title %}Not verified{% endblock title %}
+
+{% block content %}
+    <br>
+     are not verified your account yet!</h2>
+        <p>please click on the below button and verify your account to continue</p>
+        <a href="{% url 'account:verification' %}">Account Verification</a>
+        
+{% endblock content %}

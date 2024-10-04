@@ -1,0 +1,74 @@
+{% include "base.html" %}
+
+{% comment %} {% block title %}Favorate Products{% endblock title %} {% endcomment %}
+
+{% block content %}
+<div class="container w-75 p-3"><br>
+    <header class="mb-4">
+        <h3 class="text-center">Faborite Products List</h3>
+    </header><br><br>
+    {% for product in favorite %}
+    <div class="card rounded-3 mb-4" id="product-cart-{{ product.id }}">
+        <div class="card-body p-4">
+            <div class="row d-flex justify-content-between align-items-center">
+                <div class="col-md-2 col-lg-2 col-xl-2">
+
+                    {% for image in product.product_images.all %}
+                    {% if image.is_cover %}
+                    <img src="{{ image.image.url }}" class="img-fluid rounded-3" alt="Cotton T-shirt">
+                    {% endif %}
+                    {% endfor %}
+
+
+                </div>
+                <div class="col-md-3 col-lg-3 col-xl-3">
+                    <a href="{{ product.get_absolute_url }}">
+                        <p class="lead fw-normal mb-2">{{ product.name }}</p>
+                    </a>
+                </div>
+                <div class="col-md-3 col-lg-3 col-xl-3">
+                    <a href="{{ product.get_absolute_url }}">
+                        <p class="lead fw-normal mb-2">{{ product.desccription|truncatechars:100 }}</p>
+                    </a>
+                </div>
+                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                    <a href="{% url 'account:change_wishlist' product.slug %}">
+                        <button class="btn btn-outline-danger" id="remove-basket" value='{{ product.id }}'>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                class="bi bi-trash" viewBox="0 0 16 16">
+                                <path
+                                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                                <path
+                                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                            </svg>
+                        </button>
+                    </a>
+                    {% comment %} <button id="remove-basket" value='{{ product.id }}'>
+                        Remove
+                    </button> {% endcomment %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% comment %} {% for product in favorite %}
+<h1><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h1>
+
+{% for image in product.product_images.all %}
+{% if image.is_cover %}
+<img src="{{ image.image.url }}" alt="" width="500">
+{% endif %}
+{% endfor %}
+
+<p>Price: ${{ product.price }}</p>
+
+<button type="submit">
+    <a href="{% url 'account:change_favorite' product.slug%}">Delete from Favorite</a>
+</button>
+
+<hr>
+
+{% endfor %} {% endcomment %}
+
+{% endblock content %}

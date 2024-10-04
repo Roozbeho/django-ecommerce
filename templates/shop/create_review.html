@@ -1,0 +1,27 @@
+{% include "base.html" %}
+
+{% comment %} {% block title %}Log-in{% endblock title %} {% endcomment %}
+
+{% block content %}
+<br>
+    {% if form.error %}
+        {% for e in form.error %}
+            <h2>{{ e }}</h2>
+        {% endfor %}
+    {% endif %}
+
+    <div class="container">
+        <div class="col-4 mx-auto ">
+            <form method="post">
+                {% csrf_token %}
+                <label class="form-label">{{ form.title.label}}</label>
+                {{ form.title}}
+                <br>
+                <label class="form-label">{{ form.description.label}}</label>
+                {{ form.description}}
+                <br>
+                <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

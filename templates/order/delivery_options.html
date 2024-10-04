@@ -1,0 +1,59 @@
+{% include "base.html" %}
+
+{% comment %} {% block title %}Delivery options{% endblock title %} {% endcomment %}
+
+{% block content %}
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Choose Shipping Method</h2>
+    <form action="/set-shipping-method" method="post">
+      <div class="row">
+
+        {% for delivery in delivery_options %}
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ delivery.delivery_type }}</h5>
+              <p class="card-text">
+                Estimated Delivery: {{ delivery.deliverd_time }}<br>
+                Cost: $ {{ delivery.price}}
+              </p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="option" id="{{ delivery.id }}" value="{{ delivery.id }}" checked>
+                <label class="form-check-label" for="standardShipping">
+                  Choose {{ delivery.delivery_type }} Shipping
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+      <div class="text-center">
+        <a type="submit" class="btn btn-primary mt-3" href="{% url 'order:payment' %}">Go to Payment</a>
+      </div>
+    </form>
+  </div>
+
+    <script>
+        $("input[type=radio][name='option']").on('change',function(e){
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'order:delivery_option' %}',
+                data: {
+                    deliveryid: $(this).val(),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: 'update'
+                },
+                success: function(json){
+                    document.getElementById('selected-delivery').innerHTML = 
+                        'your selected delivery option is: ' + json.delivery_type
+                },
+                error: function(xhr, status, error){
+                }
+            })
+        }) 
+    </script>
+{% endblock content %}
+

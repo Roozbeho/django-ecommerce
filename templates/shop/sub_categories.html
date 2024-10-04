@@ -1,0 +1,67 @@
+{% include 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+<section style="background-color: #eee;">
+    <div class="text-center container py-5">
+        <h4 class="mt-4 mb-5"><strong>Product's in {{ subcategory_name.name }} section</strong></h4>
+
+
+        <div class="row">
+            {% for s in subcategory %}
+            {% for product in s.products.all %}
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="card">
+                    <div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light"
+                        data-mdb-ripple-color="light">
+                        <a href='{{ product.get_absolute_url }}'>
+                        <img src="{{ product.get_cover_image.image.url }}"
+                            class="products-image">
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <p class="text-reset">
+                                <h5 class="card-title mb-3">{{ product.name }}</h5>
+                            </p>
+                            <div class="col-6 text-start">
+                                <h6 class="">$ {{product.price}}</h6>
+                            </div>
+                            <div class="col-3 text-end">
+                                <a href="{{ product.get_absolute_url }}" class="text-reset">
+                                    View
+                                </a>
+                            </div>
+                            <div class="col-3 text-start">
+                                <a href="{% url 'account:change_favorite' product.slug %}" class="text-reset">
+                                    favorite
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+
+
+
+</section>
+{% endblock content %}

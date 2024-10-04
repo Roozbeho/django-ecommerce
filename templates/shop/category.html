@@ -1,0 +1,161 @@
+{% include 'base.html' %}
+{% load static %}
+
+{% comment %} {% block title %}Home{% endblock title %}Home {% endcomment %}
+
+{% block content %}
+<!-- category -->
+
+<!-- Products -->
+<section>
+    <div class="container my-5">
+        <header class="mb-4 text-center">
+            <h3>{{category_name.name}} Section</h3>
+        </header>
+    </div>
+
+    <hr>
+    {% for c in category %}
+    {% for subcategory in c.subcategories.all %}
+    <div class="container my-5">
+        <header class="mb-4">
+            <h3>product's in <a href="{{ subcategory.get_absolute_url }}">{{subcategory.name}}</a></h3>
+        </header>
+
+        <div class="row">
+            {% for product in subcategory.products.all %}
+            <div class="col-lg-2 col-md-6 col-sm-6">
+                <div class="card my-2 shadow-0">
+                    <a href="{{ product.get_absolute_url }}" class="">
+
+                        <img src="{{ product.get_cover_image.image.url }}"
+                            class="card-img-top rounded-2 home_page_image" style="aspect-ratio: 1 / 1" />
+                    </a>
+                    <div class="card-body">
+                        <div class="row">
+                            {% comment %} <div class="col-3">
+                                <h6 class=" badge bg-danger pt-1">
+                                    New
+                                </h6>
+                            </div> {% endcomment %}
+
+                            <div class="col text-center">
+                                <h6 class="card-title">{{product.name}}</h6>
+                            </div>
+                        </div>
+
+                        <p class="card-text mb-0">{{product.description|truncatechars:10}}...</p>
+                        <p class="text-muted pt-2">
+                            Price: ${{product.price}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <hr>
+    </div>
+    {% endfor %}
+    {% endfor %}
+</section>
+<hr>
+<!-- Products -->
+
+<!-- Features -->
+{% comment %} <section>
+    <div class="container">
+        <div class="card p-4 bg-primary">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h4 class="mb-0 text-white">Best products and brands in store</h4>
+                    <p class="mb-0 text-white-50">Trendy products and text to build on the card title</p>
+                </div>
+                <div class="col-auto"><a class="btn btn-white text-primary shadow-0" href="#">Discover</a></div>
+            </div>
+        </div>
+    </div>
+</section> {% endcomment %}
+<!-- Features -->
+
+
+<!-- Products -->
+
+<!-- Features -->
+{% comment %} <section>
+    <div class="container">
+        <div class="card p-4 bg-primary">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h4 class="mb-0 text-white">Best products and brands in store</h4>
+                    <p class="mb-0 text-white-50">Trendy products and text to build on the card title</p>
+                </div>
+                <div class="col-auto"><a class="btn btn-white text-primary shadow-0" href="#">Discover</a></div>
+            </div>
+        </div>
+    </div>
+</section> {% endcomment %}
+<!-- Features -->
+
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% include "base.html" %}
+
+{% block title %}{% endblock title %}
+
+{% block content %}
+    {% if scategory %}
+        <h1>Product in {{ scategory.first.name }}</h1>
+    {% else %}
+        <h1>Product in {{ category.name }}</h1>
+    {% endif %}
+
+    {% for subcategory in scategory %}
+        <h1><a href="{{ subcategory.get_absolute_url }}">{{ subcategory }}</a></h1>
+
+        {% for products in subcategory.products.all %}
+            <h1><b>{{ products.name }}</b></h1>
+            {% for image in products.product_images.all %}
+                {% if image.is_cover %}
+                    <img src="{{ image.image.url }}" alt="" width="500">
+                {% endif %}
+            {% endfor %}
+
+            <h2>Features:</h2>
+            {% for specific in products.productspecificationvalue_set.all %}
+                <h3>{{ specific.productspecification.name }} : {{ specific.value }}</h3>
+            {% endfor %}
+
+            <h2>Price: $ {{ products.price }}</h2>
+            <hr>
+            <br>
+        {% endfor %}
+        <hr>
+        <hr>
+        <br>
+
+    {% endfor %}
+    
+{% endblock content %} {% endcomment %}

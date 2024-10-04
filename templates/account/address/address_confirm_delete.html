@@ -1,0 +1,17 @@
+{% include "base.html" %}
+
+{% comment %} {% block title %}
+    Delete address
+{% endblock title %} {% endcomment %}
+
+{% block content %}
+    <div class='container py-3'>
+        <form method="post">
+            {% csrf_token %}
+            <p>Are you sure you want to delete "{{ object }}"?</p>
+
+                <input type="submit" value="Confirm" class='btn btn-danger'>
+        </form>
+    </div>
+
+{% endblock content %}

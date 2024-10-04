@@ -1,0 +1,174 @@
+{% include '../base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="images p-3">
+                            <div class="text-center p-4">
+                                <img id="main-image" src="{{ product.get_cover_image.image.url }}" width="250"
+                                    height="250" />
+                            </div>
+                            <div class="thumbnail text-center">
+                                {% for image in product.product_images.all %}
+                                {% if not image.is_cover %}
+                                <img src="{{ image.image.url }}" width="75" height="50">
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="product p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-long-arrow-left"></i>
+                                    {% comment %} <span class="ml-1">Back</span> {% endcomment %}
+                                </div>
+                                <i class="fa fa-shopping-cart text-muted"></i>
+                            </div>
+                            <div class="row">
+                                <div class="col-9">
+                                    <h5 class="text-uppercase pt-3">{{ product.name }}</h5>
+                                </div>
+                                <div class="col-3">
+                                    <a href="{% url 'account:change_wishlist' product.slug %}"
+                                        class="text-reset btn btn-outline-secondary">
+                                        wishlist
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="about">{{ product.description|linebreaks }}</p>
+                        <div class="sizes mt-3">
+                            <h6 class="text-uppercase">Price : $ {{ product.price }}</h6>
+                            <div class="row pt-2">
+                                {% for value in product.productspecificationvalue_set.all %}
+                                <div class="col-4">
+                                    <p class="text-muted">{{ value.productspecification.name }} : {{ value.value }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="cart mt-2 align-items-center">
+                            <button class="btn btn-danger text-uppercase mr-2 px-4" id="add-button"
+                                value="{{product.id}}">
+                                Add to cart
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<section class="py-5 bg-light">
+    <div class="container px-4 px-lg-5 mt-5">
+        <h2 class="fw-bolder mb-4">People Also Buys</h2>
+        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+            <div class="col mb-5">
+                <div class="card h-100">
+                    <!-- Product image-->
+                    <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="...">
+                    <!-- Product details-->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <!-- Product name-->
+                            <h5 class="fw-bolder">Fancy Product</h5>
+                            <!-- Product price-->
+                            $40.00 - $80.00
+                        </div>
+                    </div>
+                    <!-- Product actions-->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">View options</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="background-color: #e7effd;">
+    <div class="container my-5 py-5 text-body">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-11 col-lg-9 col-xl-7">
+                {% for review in product.reviews.all %}
+                <div class="d-flex flex-start mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="55" height="55" fill="currentColor" class="rounded-circle shadow-1-strong me-3 bi bi-person-fill" viewBox="0 0 16 16">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                        </svg>
+                    <div class="card w-100">
+                        <div class="card-body p-4">
+                            <div class="">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <h5>{{ review.customer.username }}</h5>
+                                    </div>
+                                    <div class="col-6 text-success text-end">
+                                        {% with buyer=review.is_buyer  %}
+                                            {% if buyer %}
+                                                <p class="text-success">Buyer</p>
+                                            {% else %}
+                                                <p class="text-danger">Not Buyer</p>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                                <p class="small">{{ review.created_at|time:'h:i' }} - {{ review.created_at|date:'Y/m/d' }}</p>
+                                <p>
+                                    {{ review.description|linebreaks }}
+                                </p>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <a href="#!" class="link-muted me-2">
+                                            <i class="fas fa-thumbs-up me-1"></i>132
+                                        </a>
+                                        <a href="#!" class="link-muted"><i class="fas fa-thumbs-down me-1"></i>15</a>
+                                    </div>
+                                    {% comment %} <a href="#!" class="link-muted"><i class="fas fa-reply me-1"></i> Reply</a> {% endcomment %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                <a class="btn btn-outline-primary col-3" href="{% url 'shop:create_review' product.slug %}">
+                    Add Review
+                </a>
+
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).on('click', '#add-button', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'basket:add' %}",
+            data: {
+                product_id: $('#add-button').val(),
+                quantity: 1,
+                csrfmiddlewaretoken: "{{csrf_token}}",
+                action: 'add'
+            },
+            success: function (json) {
+                document.getElementById('basket_length').innerHTML = 'Basket: ' + json
+                    .basket_length;
+            },
+            error: function (json) {}
+        });
+    })
+</script>
+{% endblock content %}

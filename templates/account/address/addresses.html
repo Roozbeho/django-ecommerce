@@ -1,0 +1,92 @@
+{% include "base.html" %}
+
+{% block title %}Address{% endblock title %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Your Addresses</h2>
+    <form action="/set-default-address" method="post">
+        <div class="row">
+            <!-- Address 1 -->
+            {% for address in addresses %}
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        {% if address.is_default %}
+                        <h6>it's default address</h6>
+                        {% else %}
+                        {% if not address.is_default %}
+                        <a href="{% url 'account:set_default_address' address.id %}">
+                            set as a sefault Address
+                        </a><br>
+                        {% endif %}
+                        {% endif %}
+                        <h5 class="card-title">Home Address</h5>
+                        <p class="card-text">
+                            Full Name : {{address.first_name}} {{address.last_name}}<br>
+                            Phone number : {{ address.phone_number }}<br><br>
+                            {{ address.address_line_1}}<br>
+                            {{ address.address_line_2}}<br>
+                            {{address.city}}, {{address.state}}, {{address.postal_code}}<br>
+                            {{address.country}}
+
+                        </p>
+                        <div class="form-check">
+                            <a href="{% url 'account:delete_address' address.id %}" class="btn btn-danger" type="submit"
+                                value="Delete">
+                                Delete
+                            </a>
+                            <a href="{% url 'account:update_address' address.id %}" class="btn btn-primary"
+                                type="submit">
+                                UpdateAddress
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <a href="{% url 'account:create_address' %}" class="btn btn-success text-center mx-auto">
+                New Address
+            </a>
+
+    </form>
+</div>
+{% comment %}
+<hr>
+
+<button type="submit" value="Delete">
+    <a href="{% url 'account:create_address'%}">Add New Address</a>
+</button>
+
+<hr>
+
+{% for address in addresses %}
+{% if address.is_default %}
+<h1>its default address</h1>
+{% endif %}
+<p>fullname : {{ address.first_name }} {{ address.last_name }}</p>
+<p>phone number : {{ address.phone_number }}</p>
+<p>postal code : {{ address.postal_code }}</p>
+<p>state: {{ address.state }}</p>
+<p>address line 1 :{{ address.address_line_1 }}</p>
+<p>address line 2: {{ address.address_line_2 }}</p>
+{% if address.is_default %}
+<h3>its default address</h3>
+{% endif %}
+
+<button type="submit" value="Delete">
+    <a href="{% url 'account:delete_address' address.id %}">Delete</a>
+</button>
+<button type="submit" value="Delete">
+    <a href="{% url 'account:update_address' address.id %}">UpdateAddress</a>
+</button>
+{% if not address.is_default %}
+<button type="submit" value="Delete">
+    <a href="{% url 'account:set_default_address' address.id %}">set as a sefault Address</a>
+</button>
+{% endif %}
+<hr>
+
+{% endfor %} {% endcomment %}
+
+{% endblock content %}
