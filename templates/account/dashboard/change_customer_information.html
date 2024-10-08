@@ -1,0 +1,34 @@
+{% include "base.html" %}
+
+{% comment %} {% block title %}Log-in{% endblock title %} {% endcomment %}
+
+{% block content %}
+<br>
+    {% if form.error %}
+        {% for e in form.error %}
+            <h2>{{ e }}</h2>
+        {% endfor %}
+    {% endif %}
+
+    <div class="container">
+        <div class="col-4 mx-auto ">
+            <h4>Change Your account details below:</h4>
+            <hr>
+            <form method="post">
+                {% csrf_token %}
+                <label class="form-label">{{ form.email.label}}</label>
+                {{ form.email}}
+                <br>
+                <label class="form-label">{{ form.username.label}}</label>
+                {{ form.username}}
+                <br>
+                <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Change</button>
+                <br>
+                <div class="row">
+                    <p class="col-6"><a href="{% url 'account:change_password' %}" class="text-success">Change Password</a></p>
+                    <p class="col-6 text-end"><a href="{% url 'account:delete_account' %}" class="text-danger">Delete Account</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

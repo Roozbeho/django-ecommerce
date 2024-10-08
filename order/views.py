@@ -24,7 +24,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 
 from .models import DeliveryOptions, Order, OrderItem, PaymentDetails
 from .paypal import PayPalClient
-from .tasks import send_order_email
+from .tasks import send_email
 
 
 class BasketNotEmptyRequired:
@@ -53,11 +53,12 @@ class DelieryOptionchoices(VerificationAccountRequiredMixin, BasketNotEmptyRequi
     template_name = "order/delivery_options.html"
 
     def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
         self.basket = Basket(request)
         if not self.basket.session.get("delivery_address"):
             messages.warning(request, "please set an delivery address first")
             return redirect("order:order_address")
-        return super().dispatch(request, *args, **kwargs)
+        return response
 
     def get_queryset(self):
         return DeliveryOptions.objects.filter(is_active=True)
@@ -78,6 +79,7 @@ class PaymentView(VerificationAccountRequiredMixin, BasketNotEmptyRequired, View
     form_class = CouponForm
 
     def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
         self.basket = Basket(request)
 
         if not self.basket.session.get("delivery_address"):
@@ -99,7 +101,7 @@ class PaymentView(VerificationAccountRequiredMixin, BasketNotEmptyRequired, View
             "paypal_client_id": settings.PAYPAL_CLIENT_ID,
         }
 
-        return super().dispatch(request, *args, **kwargs)
+        return response
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name, self.context)
@@ -175,7 +177,7 @@ class PaymentCompleteView(VerificationAccountRequiredMixin, View):
 
         subject = "Your order made on successfully"
         messages = render_to_string("order/order_made_email.html", {"order": order})
-        send_order_email.delay(subject, messages, request.user.email)
+        send_email.delay(subject, messages, request.user.email)
 
         return JsonResponse("Payment completed!", safe=False)
 

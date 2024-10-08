@@ -7,7 +7,7 @@ from ecommerce.celery import app
 
 
 @app.task
-def send_order_email(subject, message, user_email):
+def send_email(subject, message, user_email):
     
     send_mail(
         subject=subject,

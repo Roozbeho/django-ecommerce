@@ -23,3 +23,4 @@ def remove_unactive_otp_code():
     for code in otpcodes:
         sys.stdout.write(f"removing {code.otp_code} email {code.email}")
         code.delete()
+

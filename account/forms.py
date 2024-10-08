@@ -1,5 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.forms import PasswordChangeForm
+
 
 from .models import Address, Customer
 
@@ -80,3 +82,34 @@ class AddressForm(forms.ModelForm):
         self.fields["address_line_2"].widget.attrs.update(
             {"class": "form-control mb-4", "placeholder": "address_line_2"}
         )
+
+
+class ChangeCustomerInformationForm(forms.ModelForm):
+    password=None
+    class Meta:
+        model = Customer
+        fields = ['email', 'username']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update(
+            {'class': 'form-control', 'placeholder':'Email address', 'readonly':'readonly'}
+        )
+        self.fields['username'].widget.attrs.update(
+            {'class': 'form-control', 'placeholder': 'User name'}
+        )
+
+    def clean(self):
+        if Customer.objects.filter(username=self.cleaned_data['username']).exists():
+            raise forms.ValidationError(_('thise uesrname is already exists'))
+        return self.cleaned_data
+    
+    
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        # self.user = user
+        super().__init__(*args, **kwargs)
+        self.fields["old_password"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "Old Password"})
+        self.fields["new_password1"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "New Password"})
+        self.fields["new_password2"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "Repeat New Password"})

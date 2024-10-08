@@ -46,4 +46,10 @@ urlpatterns = [
         views.SubmitVerificationCodeView.as_view(),
         name="submit_verification_code",
     ),
+
+    # Account management
+    path('account-management/', views.ChangeCustomerInformationView.as_view(), name='account_management'),
+    path('delete-account', views.DeleteAccountView.as_view(), name='delete_account'),
+    # path('change-password-email',)
+    path('change_password/', views.ChangePasswordView.as_view(), name='change_password'),
 ]

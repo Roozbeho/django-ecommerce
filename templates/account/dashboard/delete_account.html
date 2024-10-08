@@ -1,0 +1,29 @@
+{% include "base.html" %}
+
+{% comment %} {% block title %}Log-in{% endblock title %} {% endcomment %}
+
+{% block content %}
+<br><br>
+    {% if form.error %}
+        {% for e in form.error %}
+            <h2>{{ e }}</h2>
+        {% endfor %}
+    {% endif %}
+
+    <div class="container">
+        <div class="col-6 text-center">
+            <form method="post">
+                {% csrf_token %}
+                <h4>Are you sure want to <b class="text-danger">Delete Your account</b>? </h4>
+                <br>
+                <button class="btn rounded-3 btn-danger" type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+{% endblock content %}
+
+{% comment %} <form method="post">
+    {% csrf_token %}
+    <h3>Are you sure want to logout? </h3>
+    <input type="submit" value="Logout">
+</form> {% endcomment %}

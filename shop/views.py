@@ -148,12 +148,13 @@ class CreateReviewView(VerificationAccountRequiredMixin, CreateView):
     form_class = ReviewForm
 
     def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
         self.product = Product.objects.get(slug=self.kwargs["slug"])
         if not Review.is_valid(self.request.user, self.product):
             messages.warning(request, "you already have review on this product")
             return redirect(request.META["HTTP_REFERER"])
 
-        return super().dispatch(request, *args, **kwargs)
+        return response
 
     def form_valid(self, form):
         form.instance.customer = self.request.user

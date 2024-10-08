@@ -8,9 +8,16 @@ from django.core.validators import (MaxLengthValidator, MinLengthValidator,
                                     MinValueValidator)
 from django.db import models
 from django.utils import timezone
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.sites.shortcuts import get_current_site
 
+
+from order.tasks import send_email
 from .manager import CustomCustomerManager
 from .utils import create_random_code
+from .token import Change_Password_token
 
 
 class Customer(AbstractBaseUser, PermissionsMixin):

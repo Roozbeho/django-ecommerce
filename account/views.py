@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from basket.basket import Basket
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -8,19 +9,22 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView, FormView
 from order.models import Order
 from shop.models import Product
+from django.contrib.auth.views import PasswordChangeView
 
 from .forms import (AccountVerificationForm, AddressForm, LoginForm,
-                    RegistrationForm)
-from .models import Address, OtpCode
+                    RegistrationForm, ChangeCustomerInformationForm, CustomPasswordChangeForm)
+from .models import Address, OtpCode, Customer
 
 class VerificationAccountRequiredMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_verified:
+        response = super().dispatch(request, *args, **kwargs)
+        if hasattr(request.user, 'is_verified') and not request.user.is_verified:
             return render(request, "account/not_verified_account.html")
-        return super().dispatch(request, *args, **kwargs)
+        return response
+        # return super().dispatch(request, *args, **kwargs)
 
 
 class DashboardView(VerificationAccountRequiredMixin, View):
@@ -86,9 +90,10 @@ class LogoutView(LoginRequiredMixin, View):
 class AccountVerificationView(LoginRequiredMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_verified:
+        response = super().dispatch(request, *args, **kwargs)
+        if hasattr(request.user, 'is_verified') and request.user.is_verified:
             return redirect("/")
-        return super().dispatch(request, *args, **kwargs)
+        return response
 
     def get(self, request, *args, **kwargs):
         user_email = request.user.email
@@ -109,9 +114,10 @@ class SubmitVerificationCodeView(LoginRequiredMixin, View):
     form_class = AccountVerificationForm
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_verified:
+        response = super().dispatch(request, *args, **kwargs)
+        if hasattr(request.user, 'is_verified') and request.user.is_verified:
             return redirect("/")
-        return super().dispatch(request, *args, **kwargs)
+        return response
 
     def get(self, request, *args, **kwargs):
         return render(request, "account/verification_code_form.html", {"form": self.form_class})
@@ -215,3 +221,59 @@ class UserOrdersView(VerificationAccountRequiredMixin, ListView):
             .annotate(qty=Count("orderitems__id"))
             .prefetch_related("payments")
         )
+
+
+class ChangeCustomerInformationView(VerificationAccountRequiredMixin ,FormView):
+    template_name = 'account/dashboard/change_customer_information.html'
+    form_class = ChangeCustomerInformationForm
+    success_url = reverse_lazy('account:dashboard')
+    
+    def get_initial(self):
+        return {
+            'email': self.request.user.email,
+            'username': self.request.user.username
+        }
+      
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(initial=self.initial_dict, data=request.POST)
+        if form.is_valid():
+            if request.user.email != form.cleaned_data['email']:
+                raise ValueError('You cannot change your email address')
+
+            request.user.username = form.cleaned_data['username']
+            request.user.save()
+
+            messages.success(request, 'your username changed successfully')
+            return redirect('account:dashboard')
+        return render(request, self.template_name, {'form': form})
+    
+
+class DeleteAccountView(VerificationAccountRequiredMixin, View):
+    template_name = 'account/dashboard/delete_account.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        customer = Customer.objects.get(email=request.user.email)
+        customer.is_active = False
+        customer.save()
+        messages.warning(request, 'Your account was deleted successfully')
+        return redirect('account:register')
+    
+
+class ChangePasswordView(VerificationAccountRequiredMixin, PasswordChangeView):
+    form_class = CustomPasswordChangeForm
+    success_url = reverse_lazy('account:login')
+    template_name = 'account/account_management/change_password.html'
+
+    def form_valid(self, form):
+        logout(self.request)
+        messages.success(self.request, 'your password changed, please log in again')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        for error in form.errors:
+            messages.warning(self.request, error)
+        return super().form_invalid(form)
+    
