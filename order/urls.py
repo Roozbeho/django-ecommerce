@@ -18,4 +18,7 @@ urlpatterns = [
         views.PaymentSuccessfulView.as_view(),
         name="payment_successful",
     ),
+    path('admin/order-receipt/<order_id>/', views.OrderReceiptAdminView.as_view(), name='order_receipt_admin'),
+    path('order-receipt/<order_id>/', views.OrderReceiptView.as_view(), name='order_receipt'),
+    path('render-to-pdf/<order_id>/', views.render_order_receipt_to_PDF.as_view(), name='render_receipt_to_pdf'),
 ]

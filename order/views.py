@@ -1,7 +1,9 @@
 import json
 from decimal import Decimal
 from typing import Any
+import weasyprint
 
+from django.http.response import HttpResponse
 from account.models import Address
 from account.views import VerificationAccountRequiredMixin
 from basket.basket import Basket
@@ -9,13 +11,16 @@ from coupon.forms import CouponForm
 from coupon.models import Coupon
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, Http404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
 from django.views import View
 from django.views.generic import ListView, TemplateView
 from paypalcheckoutsdk.orders import OrdersCaptureRequest
 from django.utils.html import strip_tags
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.staticfiles.storage import staticfiles_storage
+
 
 from .models import DeliveryOptions, Order, OrderItem, PaymentDetails
 from .paypal import PayPalClient
@@ -185,3 +190,58 @@ class PaymentSuccessfulView(VerificationAccountRequiredMixin, View):
             return render(request, self.template_name)
         except:
             return redirect("account:dashboard")
+
+class OrderReceiptAdminView(TemplateView):
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if not request.user.is_staff:
+            messages.warning(request, 'only admins can view')
+            return redirect('/')
+        return super().dispatch(request, *args, **kwargs)
+    
+    template_name = 'admin/order/order/order_receipt.html'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['orders'] = Order.objects.filter(id=self.kwargs['order_id']).select_related('customer').prefetch_related('orderitems').prefetch_related('payments')
+        return context
+    
+class OrderReceiptView(TemplateView):
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        self.order = Order.objects.filter(id=self.kwargs['order_id']).select_related('customer')
+        if self.order.first().customer != request.user:
+            return Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    template_name = 'order/order_receipt.html'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['orders'] = self.order.prefetch_related('orderitems').prefetch_related('payments')
+        return context
+
+class render_order_receipt_to_PDF(View):
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return Http404
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, order_id):
+
+        orders = get_object_or_404(
+            Order.objects.prefetch_related('orderitems').select_related('payments'),
+            id=order_id)
+        
+        html = render_to_string('order/order_receipt_pdf.html', {'order': orders}, request=request)
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename=order_{orders.id}.pdf'
+        
+        css_path = staticfiles_storage.path('css/order_receipt_pdf.css')
+        
+        weasyprint.HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+            response,
+            stylesheets=[weasyprint.CSS(css_path)])
+        
+        return response
+

@@ -1,76 +1,131 @@
 {% include 'base.html' %}
 {% load static %}
 
-
-
 {% block content %}
 <section style="background-color: #eee;">
     <div class="text-center container py-5">
         <h4 class="mt-4 mb-5"><strong>Product's in {{ subcategory_name.name }} section</strong></h4>
-        <form method="get" class="mb-4">
+
+        <!-- Sorting Form -->
+        {% comment %} <form method="get" class="mb-4">
             <select name="sort" id="sort" onchange="this.form.submit()">
-                <option value="newest">Newest</option>
-                <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
-                <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High
+                </option>
+                <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to
+                    Low</option>
                 <option value="viewed" {% if request.GET.sort == 'viewed' %}selected{% endif %}>Most Viewed</option>
                 <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
             </select>
-        </form>
+        </form> {% endcomment %}
 
+        <!-- Filters and Products Row -->
         <div class="row">
-            {% comment %} {% for s in subcategory %} {% endcomment %}
-            {% for product in products %}
-            <div class="col-lg-4 col-md-12 mb-4">
-                <div class="card">
-                    <div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light"
-                        data-mdb-ripple-color="light">
-                        <a href='{{ product.get_absolute_url }}'>
-                            {% for image in product.product_images.all %}
-                                <img src="{{ image.image.url }}"  class="products-image">
-                            {% endfor %}
-                        </a>
+            <!-- Filters Section -->
+            <div class="col-3">
+                <h5>Filter by</h5>
+                <form method="get" id="filter-form">
+                    <select name="sort" id="sort" class="form-control">
+                        <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                        <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High
+                        </option>
+                        <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to
+                            Low</option>
+                        <option value="viewed" {% if request.GET.sort == 'viewed' %}selected{% endif %}>Most Viewed</option>
+                        <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                    </select>
+                    <br>
+                    <!-- Filter by Price -->
+                    <div class="mb-4">
+                        <h6>Price Range</h6>
+                        <input type="number" name="min_price" placeholder="Min Price"
+                            value="{{ request.GET.min_price }}" class="form-control mb-2">
+                        <input type="number" name="max_price" placeholder="Max Price"
+                            value="{{ request.GET.max_price }}" class="form-control">
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <p class="text-reset">
-                                <h5 class="card-title mb-3">{{ product.name }}</h5>
-                            </p>
-                            <div class="col-6 text-start">
-                                <h6 class="">$ {{product.price}}</h6>
-                            </div>
-                            <div class="col-3 text-end">
-                                <a href="{{ product.get_absolute_url }}" class="text-reset">
-                                    View
+
+                    <!-- Filter by Availability -->
+                    <div class="mb-4">
+                        <h6>Availability</h6>
+                        <label><input type="checkbox" name="in_stock" value="1"
+                                {% if request.GET.in_stock %}checked{% endif %}> In Stock</label>
+                    </div>
+
+                    <!-- Filter by Rating -->
+                    <div class="mb-4">
+                        <h6>Rating</h6>
+                        <select name="rating" class="form-control">
+                            <option value="">All</option>
+                            <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4 Stars & Up
+                            </option>
+                            <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3 Stars & Up
+                            </option>
+                            <option value="2" {% if request.GET.rating == '2' %}selected{% endif %}>2 Stars & Up
+                            </option>
+                        </select>
+                        <br>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </form>
+            </div>
+
+            <!-- Products Section -->
+            <div class="col-9">
+                <div class="row">
+                    {% for product in products %}
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light"
+                                data-mdb-ripple-color="light">
+                                <a href='{{ product.get_absolute_url }}'>
+                                    {% for image in product.product_images.all %}
+                                    <img src="{{ image.image.url }}" class="products-image rounded" style="width: 100%;">
+                                    {% endfor %}
                                 </a>
                             </div>
-                            <div class="col-3 text-start">
-                                <a href="{% url 'account:change_wishlist' product.slug %}" class="text-reset">
-                                    favorite
-                                </a>
+                            <div class="card-body">
+                                <p class="text-reset">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                </p>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <h6 class="">$ {{product.price}}</h6>
+                                        </div>
+                                        <div class="col-3 text-end">
+                                            <a href="{{ product.get_absolute_url }}" class="text-reset">
+                                                View
+                                            </a>
+
+                                        </div>
+                                        <div class="col-5 text-start">
+                                            <a href="{% url 'account:change_wishlist' product.slug %}"
+                                                class="text-reset">
+                                                favorite
+                                            </a>
+                                        </div>
+                                    </div>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <span class="page-links">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                        {% endif %}
+                        <span class="page-current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        {% endif %}
+                    </span>
                 </div>
             </div>
-            {% endfor %}
-            {% comment %} {% endfor %} {% endcomment %}
         </div>
-
-        <div class="pagination">
-            <span class="page-links">
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-                {% endif %}
-                <span class="page-current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                </span>
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">next</a>
-                {% endif %}
-            </span>
-        </div>
-
-
-
+    </div>
 </section>
 {% endblock content %}

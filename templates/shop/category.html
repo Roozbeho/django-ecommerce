@@ -15,8 +15,7 @@
     </div>
 
     <hr>
-    {% for c in category %}
-    {% for subcategory in c.subcategories.all %}
+    {% for subcategory in category.subcategories.all %}
     <div class="container my-5">
         <header class="mb-4">
             <h3>product's in <a href="{{ subcategory.get_absolute_url }}">{{subcategory.name}}</a></h3>
@@ -57,7 +56,6 @@
         </div>
         <hr>
     </div>
-    {% endfor %}
     {% endfor %}
 </section>
 <hr>

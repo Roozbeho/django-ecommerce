@@ -1,13 +1,14 @@
 from typing import Any
 from django.contrib import messages
 from django.db.models import F, OuterRef, Prefetch, Subquery, Q
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, ListView, CreateView
 
 from .models import Category, Product, Sub_Category, Review, ProductImage
 from .forms import ReviewForm
+from .tasks import increase_product_view
 from order.models import Order
 from account.views import VerificationAccountRequiredMixin
 
@@ -42,8 +43,8 @@ class CategoryView(View):
             Product.objects.filter(sub_category_id=OuterRef("sub_category_id")).values_list("id", flat=True)[:6]
         )
 
-        category = (
-            Category.objects.filter(slug=category_slug)
+        category = get_object_or_404(
+            Category.objects
             .prefetch_related("subcategories")
             .prefetch_related(
                 Prefetch(
@@ -55,12 +56,13 @@ class CategoryView(View):
                 Prefetch(
                     "subcategories__products__product_images", queryset=ProductImage.objects.filter(is_cover=True)
                 )
-            )[:6]
+            ),
+            slug=category_slug
         )
 
         context = {
             "category": category,
-            "category_name": Category.objects.get(slug=category_slug),
+            # "category_name": Category.objects.get(slug=category_slug),
         }
 
         return render(request, self.template_name, context)
@@ -96,37 +98,25 @@ class SubCategoriesView(ListView):
         else:
             qs = Product.objects.filter(sub_category__slug=self.kwargs["sub_category"])
 
+        if self.request.GET.get('max_price'):
+            qs=qs.filter(price__lte=self.request.GET.get('max_price'))
+        
+        if self.request.GET.get('min_price'):
+            qs=qs.filter(price__gte=self.request.GET.get('min_price'))
+
+        if self.request.GET.get('in_stock'):
+            qs=qs.filter(is_active=True)
+        
+
         return qs.prefetch_related(Prefetch("product_images", queryset=ProductImage.objects.filter(is_cover=True)))
 
 
-# class ProductDetailView(DetailView):
-#     # TODO: pepole also buys this :
-#     def dispatch(self, request, *args, **kwargs):
-#         obj = self.get_queryset()
-#         obj.update(viewed=F("viewed") + 1)
-#         return super().dispatch(request, *args, **kwargs)
 
-#     context_object_name = "product"
-#     template_name = "shop/product_detail.html"
-
-
-#     def get_queryset(self):
-#         return (
-#             Product.objects.filter(slug=self.kwargs["slug"])
-#             .prefetch_related("product_images")
-#             .prefetch_related("productspecificationvalue_set")
-#             .prefetch_related("reviews")
-#             .prefetch_related('reviews__customer')
-#         )
 class ProductDetailView(ListView):
     # TODO: pepole also buys this :
     def dispatch(self, request, *args, **kwargs):
-        # obj = self.get('products')
-        # obj.update(viewed=F("viewed") + 1)
-        # Product.objects.filter(slug=self.kwargs['slug']).update(viewed=F("viewed")+1)
-        # product = Product.objects.get(slug=self.kwargs['slug'])
-        # product.viewed += 1
-        # product.save()
+        increase_product_view.delay(self.kwargs['slug'])
+        
         return super().dispatch(request, *args, **kwargs)
 
     context_object_name = "reviews"
@@ -136,10 +126,11 @@ class ProductDetailView(ListView):
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        context["products"] = (
-            Product.objects.filter(slug=self.kwargs["slug"])
+        context["product"] = get_object_or_404(
+            Product.objects
             .prefetch_related("product_images")
             .prefetch_related("productspecificationvalue_set")
+            , slug=self.kwargs["slug"]
         )
         return context
 

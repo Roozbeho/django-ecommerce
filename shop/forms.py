@@ -16,3 +16,12 @@ class ReviewForm(forms.ModelForm):
         self.fields['description'].widget.attrs.update(
             {'class': 'form-control', 'placeholder': 'Description'}
         )
+
+class ProductFilterForm(forms.Form):
+    name = forms.CharField(max_length=50)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update(
+            {'class': 'form-control', 'placeholder': 'Searh Product'}
+        )

@@ -5,7 +5,6 @@
     <div class="row d-flex justify-content-center">
         <div class="col-md-10">
             <div class="card">
-                {% for product in products %}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="images p-3">
@@ -63,7 +62,6 @@
 
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
     </div>
@@ -144,7 +142,8 @@
                 </div>
                 {% endfor %}
                 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                <a class="btn btn-outline-primary col-3" href="{% url 'shop:create_review' reviews.first.product.slug %}">
+                {% comment %} <h1>{{ reviews.first.product.slug }}</h1> {% endcomment %}
+                <a class="btn btn-outline-primary col-3" href="{% url 'shop:create_review' product.slug %}">
                     Add Review
                 </a><br><br>
                 <div class="pagination">

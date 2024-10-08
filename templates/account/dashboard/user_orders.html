@@ -9,26 +9,34 @@
         <br><br>
         <div class="panel-body">
             {% for order in orders %}
-                <div class="row">
-                    <div class="col-md-1"><img src="" class="media-object img-thumbnail" /></div>
-                    <div class="col-md-11">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="pull-right"><label class="label label-danger btn text-success">
+            <div class="row">
+                <div class="col-md-1"><img src="" class="media-object img-thumbnail" /></div>
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="pull-right"><label class="label label-danger btn text-success">
                                     <b>{{ order.order_status }}</b>
                                 </label></div>
-                                <span>Order name</span> <span class="label label-info"><b>{{ order.fullname }}</b></span><br />
-                                Quantity : {{ order.qty }}, cost: $ {{ order.payments.total_price }} <br /><br>
-                            </div>
-                            <div class="col-md-12">order made on: {{ order.created_at|date:'Y/m/d' }} {{ order.created_at|time:"h:i a"}}</div>
+                            <span>Order name</span> <span
+                                class="label label-info"><b>{{ order.fullname }}</b></span><br />
+                            Quantity : {{ order.qty }}, cost: $ {{ order.payments.total_price }} <br /><br>
+                        </div>
+                        <div class='col-9 text-start'>
+                            <div class="col-md-12">order made on: {{ order.created_at|date:'Y/m/d' }}
+                                {{ order.created_at|time:"h:i a"}}</div>
+                        </div>
+                        <div class="col-3 text-end">
+                            <a class="btn btn-outline-primary"
+                                href="{% url 'order:order_receipt' order.id %}">RECEIPT</a>
                         </div>
                     </div>
                 </div>
-                <br><hr><br>
+            </div>
+            <br>
+            <hr><br>
             {% endfor %}
 
         </div>
     </div>
 </div>
 {% endblock content %}
-    
