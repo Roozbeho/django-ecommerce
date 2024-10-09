@@ -113,3 +113,46 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         self.fields["old_password"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "Old Password"})
         self.fields["new_password1"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "New Password"})
         self.fields["new_password2"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "Repeat New Password"})
+
+class ForgottenPasswordEmailForm(forms.Form):
+    email = forms.CharField(widget=forms.EmailInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({"class": "form-control mb-4", "placeholder":'E-mail'})
+
+class ChangeForgottenPasswordForm(forms.Form):
+    password1 = forms.CharField(max_length=255, widget=forms.PasswordInput)
+    password2 = forms.CharField(max_length=255, widget=forms.PasswordInput)
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        self.fields["password1"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "password"})
+        self.fields["password2"].widget.attrs.update({"class": "form-control mb-4", "placeholder": "Repeat password"})
+   
+    def clean_password2(self):
+        password1 = self.cleaned_data["password1"]
+        password2 = self.cleaned_data["password2"]
+        if password1 != password2:
+            raise forms.ValidationError(_("Password must be match"))
+
+        self._clean_password(password2)
+        return password2
+
+    def _clean_password(self, password):
+        if len(password) < 6:
+            raise forms.ValidationError(_("password length must have at least 6 characters"))
+        if not any(char.isdigit() for char in password):
+            raise forms.ValidationError(_("password must have at laest one number"))
+        if not any(char.isupper() for char in password):
+            raise forms.ValidationError(_("password must have upper case characters"))
+        if not any(char.islower() for char in password):
+            raise forms.ValidationError(_("password must have lower case characters"))
+        return password
+    
+
+    def save(self):
+        print(self.cleaned_data['password2'])
+        self.user.set_password(self.cleaned_data['password2'])
+        self.user.save()

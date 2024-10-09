@@ -7,15 +7,18 @@ from django.db.models import Count, Q, Prefetch
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView, FormView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView, FormView, TemplateView
 from order.models import Order
 from shop.models import Product
 from django.contrib.auth.views import PasswordChangeView
 
 from .forms import (AccountVerificationForm, AddressForm, LoginForm,
-                    RegistrationForm, ChangeCustomerInformationForm, CustomPasswordChangeForm)
+                    RegistrationForm, ChangeCustomerInformationForm, CustomPasswordChangeForm, 
+                    ForgottenPasswordEmailForm, ChangeForgottenPasswordForm)
 from .models import Address, OtpCode, Customer
 
 class VerificationAccountRequiredMixin(LoginRequiredMixin):
@@ -55,7 +58,7 @@ class LoginView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            messages.error(request, "You already singed in, please loggout first")
+            messages.error(request, "You are already signed in. Please log out first.")
             return redirect("/")
         return super().dispatch(request, *args, **kwargs)
 
@@ -234,18 +237,21 @@ class ChangeCustomerInformationView(VerificationAccountRequiredMixin ,FormView):
             'username': self.request.user.username
         }
       
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial_dict, data=request.POST)
-        if form.is_valid():
-            if request.user.email != form.cleaned_data['email']:
-                raise ValueError('You cannot change your email address')
+    def form_valid(self, form):
+        if self.request.user.email != form.cleaned_data['email']:
+            form.add_error('email', 'You cannot change your email address.')
+            return self.form_invalid(form)
+        
+        self.request.user.username = form.cleaned_data['username']
+        self.request.user.save()
+        
+        messages.success(self.request, 'Your username has been changed successfully.')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Please correct the errors below.')
+        return super().form_invalid(form)
 
-            request.user.username = form.cleaned_data['username']
-            request.user.save()
-
-            messages.success(request, 'your username changed successfully')
-            return redirect('account:dashboard')
-        return render(request, self.template_name, {'form': form})
     
 
 class DeleteAccountView(VerificationAccountRequiredMixin, View):
@@ -277,3 +283,64 @@ class ChangePasswordView(VerificationAccountRequiredMixin, PasswordChangeView):
             messages.warning(self.request, error)
         return super().form_invalid(form)
     
+
+class ResetPasswordEmailAddressView(View):
+    template_name = 'account/reset_password/reset_password.html'
+    form_class = ForgottenPasswordEmailForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('/')
+        return super().dispatch(request, *args, **kwargs)        
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {'form': self.form_class})
+    
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            try:
+                user = Customer.objects.get(email=form.cleaned_data['email'])
+                user.send_forget_password_email(request)
+            except Exception as e:
+                print(e)
+            return redirect('account:reset_password_sent')
+        return render(request, self.template_name, {'form': form})
+    
+class ResetPasswrdEmailSentView(TemplateView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('/')
+        return super().dispatch(request, *args, **kwargs) 
+      
+    template_name = 'account/reset_password/reset_password_email_sent.html'
+
+
+class ChangeForgottenPasswordView(View):
+    template_name = 'account/reset_password/change_passwrd.html'
+    form_class = ChangeForgottenPasswordForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('/')
+
+        if not Customer.validate_change_password_email_token(self.kwargs['token'], self.kwargs['uid']):
+            messages.warning(request, 'reset password link is invalid, please try again')
+            return ('account:reset_password')
+        
+        user_id = force_str(urlsafe_base64_decode(self.kwargs['uid']))
+        self.customer = Customer.objects.get(id=user_id)
+
+        return super().dispatch(request, *args, **kwargs)
+    
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {'form': self.form_class(user=self.customer)})
+    
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(user=self.customer, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your password has been changed')
+            return redirect('account:login')
+        return render(request, self.template_name, {'form': form})

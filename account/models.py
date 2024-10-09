@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
 
 
 from order.tasks import send_email
@@ -36,6 +37,42 @@ class Customer(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         indexes = [models.Index(fields=["email"]), models.Index(fields=["username"])]
+    
+    def send_forget_password_email(self, request):
+        try:
+            token = Change_Password_token.make_token(self)
+            uid = urlsafe_base64_encode(force_bytes(self.pk))
+            subject = 'Change Account Password'
+            link = request.build_absolute_uri(reverse('account:change_reset_password', args=[uid, token]))
+            message = render_to_string(
+            'account/reset_password/reset_password_email_msg.html',
+                {
+                    'user': self,
+                    'link': link,
+                }
+            )
+            send_email.delay(subject, message, self.email)
+        except:
+            raise ValueError('Some thing happend, please try again')
+    @classmethod
+    def validate_change_password_email_token(cls, token, uidb64):
+        print('yes', "*"*50)
+        user_id = force_str(urlsafe_base64_decode(uidb64))
+        print('yes2', "*"*50)
+        try:
+            print('yes3', "*"*50)
+            customer = Customer.objects.get(id=int(user_id))
+            if Change_Password_token.check_token(customer, token):
+                print('yes4', "*"*50)
+                return True
+            return False
+        except Exception as e:
+            print(e)
+            return False
+
+    
+
+
 
     def __str__(self):
         return self.username

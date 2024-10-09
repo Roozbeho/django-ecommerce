@@ -51,5 +51,8 @@ urlpatterns = [
     path('account-management/', views.ChangeCustomerInformationView.as_view(), name='account_management'),
     path('delete-account', views.DeleteAccountView.as_view(), name='delete_account'),
     # path('change-password-email',)
-    path('change_password/', views.ChangePasswordView.as_view(), name='change_password'),
+    path('change-password/', views.ChangePasswordView.as_view(), name='change_password'),
+    path('reset-password', views.ResetPasswordEmailAddressView.as_view(), name='reset_password'),
+    path('reset-password/email-sent/', views.ResetPasswrdEmailSentView.as_view(), name='reset_password_sent'),
+    path('reset_password/change/<uid>/<token>/', views.ChangeForgottenPasswordView.as_view(), name='change_reset_password'),
 ]
