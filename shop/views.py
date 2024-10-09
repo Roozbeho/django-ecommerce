@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, ListView, CreateView
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Category, Product, Sub_Category, Review, ProductImage
 from .forms import ReviewForm
@@ -33,6 +34,37 @@ class HomeView(ListView):
             .get_queryset()
             .prefetch_related(Prefetch("product_images", queryset=ProductImage.objects.filter(is_cover=True)))[:6]
         )
+
+
+class SearchProductView(View):
+    template_name = 'shop/search_products_result.html'
+
+    def get(self, request, *args, **kwargs):
+
+        search_query = request.GET.get('q')
+        
+        if not search_query:
+            return redirect('/')
+
+        products = Product.objects.filter(
+            Q(name__icontains=search_query) |
+            Q(slug__icontains=search_query) |
+            Q(sub_category__name__icontains=search_query) |
+            Q(sub_category__category__name__icontains=search_query)
+        ).prefetch_related(Prefetch('product_images', queryset=ProductImage.objects.filter(is_cover=True)))
+        page = request.GET.get('page', 1)
+        
+        paginator = Paginator(products, 8)
+
+        try:
+            products = paginator.page(page)
+        except PageNotAnInteger:
+            products = paginator.page(1)
+        except EmptyPage:
+            products = paginator.page(paginator.num_pages)
+
+        
+        return render(request, self.template_name, {'products': products})
 
 
 class CategoryView(View):

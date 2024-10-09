@@ -1,0 +1,70 @@
+{% include 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section style="background-color: #eee;">
+    <div class="text-center container py-5">
+        <h4 class="mt-4 mb-5"><strong>Search Result For {{ request.GET.q }}</strong></h4>
+            <!-- Products Section -->
+            <div class="col-9">
+                <div class="row">
+                    {% for product in products %}
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light"
+                                data-mdb-ripple-color="light">
+                                <a href='{{ product.get_absolute_url }}'>
+                                    {% for image in product.product_images.all %}
+                                    <img src="{{ image.image.url }}" class="products-image rounded" style="width: 100%;">
+                                    {% endfor %}
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-reset">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                </p>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <h6 class="">$ {{product.price}}</h6>
+                                        </div>
+                                        <div class="col-3 text-end">
+                                            <a href="{{ product.get_absolute_url }}" class="text-reset">
+                                                View
+                                            </a>
+
+                                        </div>
+                                        <div class="col-5 text-start">
+                                            <a href="{% url 'account:change_wishlist' product.slug %}"
+                                                class="text-reset">
+                                                favorite
+                                            </a>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <hr><br><br><br>
+                    <div class="col12">
+                        <h2>No result found</h2>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <span class="page-links">
+                        {% if products.has_previous %}
+                        <a href="?q={{request.GET.q}}&page={{ products.previous_page_number }}">previous</a>
+                        {% endif %}
+                        <span class="page-current">
+                            Page {{ products.number }} of {{ products.paginator.num_pages }}.
+                        </span>
+                        {% if products.has_next %}
+                        <a href="?q={{request.GET.q}}&page={{ products.next_page_number }}">next</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

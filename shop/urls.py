@@ -20,4 +20,5 @@ urlpatterns = [
     # path('categroy/<category>/', views.SubCategoriesView.as_view(), name="subcategory"),
     path("product/<slug:slug>/", views.ProductDetailView.as_view(), name="product_detail"),
     path('create-review/<slug>/', views.CreateReviewView.as_view(), name='create_review'),
+    path('search/', views.SearchProductView.as_view(), name="search"),
 ]
