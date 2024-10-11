@@ -1,4 +1,6 @@
-
+{% extends 'admin/base.html' %}
+{% load order_tags %}
+{% block extrastyle %}
 <style>
     .invoice-container {
         width: 100%;
@@ -65,7 +67,8 @@
         color: #999;
     }
 </style>
-
+{% endblock extrastyle %}
+{% block content %}
 <div class="invoice-container">
     <div class="invoice-header">
         <h1>Order Receipt</h1>
@@ -120,3 +123,4 @@
     </div>
     {% endfor %}
 </div>
+{% endblock content %}

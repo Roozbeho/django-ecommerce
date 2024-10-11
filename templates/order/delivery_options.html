@@ -1,14 +1,12 @@
 {% include "base.html" %}
 
-{% comment %} {% block title %}Delivery options{% endblock title %} {% endcomment %}
-
 {% block content %}
 
 <div class="container my-5">
     <h2 class="text-center mb-4">Choose Shipping Method</h2>
     <form action="/set-shipping-method" method="post">
       <div class="row">
-
+        <h6 id="selected-delivery" class="text-warning"></h6>
         {% for delivery in delivery_options %}
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm">

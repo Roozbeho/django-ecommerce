@@ -1,0 +1,123 @@
+{% include 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="pt-3">
+    <div class="container">
+        <div class="row gx-3">
+            <main class="col-lg-12">
+                <div class="card-banner p-5 rounded-5" style="height: 350px; background-color: #f87217;">
+                    <div style="max-width: 1000px;">
+                            Great products with <br />
+                            best deals
+                        </h2>
+                        <p class="text-white">No matter how far along you are in your sophistication as an amateur
+                            astronomer, there is always one.</p>
+                        <a href="#" class="btn btn-light shadow-0 text-primary"> View more </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</section>
+<hr>
+
+<section>
+    <div class="container pt-5">
+        <header class="mb-4">
+            <h3>Categories</h3>
+        </header>
+        <div class="row gy-3">
+            {% for c in category %}
+            <div class="col-3">
+                <a href="{{ c.get_absolute_url }}" class="text-center d-flex flex-column justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary mx-auto p-3 mb-2"
+                        data-mdb-ripple-color="dark">
+                        <i>
+                            <img src="{{ c.image.url }}" style="width: 30px; aspect-ratio: 1 / 1">
+                        </i>
+                    </button>
+                </a>
+                <div class="text-dark text-center d-flex flex-column justify-content-center"><small>{{ c.name }}</small></div>
+            </div>
+            {% endfor %}
+        </div>
+</section>
+<hr>
+
+
+<section>
+    <div class="container my-5">
+        <header class="mb-4">
+            <h3>Most Veiwed</h3>
+        </header>
+
+        <div class="row">
+            {% for product in most_viewed_product %}
+            <div class="col-lg-2 col-md-6 col-sm-6">
+                <div class="card my-2 shadow-0">
+                    <a href="{{ product.get_absolute_url }}" class="">
+                        {% for image in product.product_images.all %}
+
+                        <img src="{{ image.image.url }}" class="card-img-top rounded-2"
+                            style="aspect-ratio: 1 / 1" />
+
+                        {% endfor %}
+                    </a>
+                    <div class="card-body p-0 pt-3">
+                        <h6 class="card-title">&nbsp;{{product.name}}</h6>
+                        <p class="card-text mb-0">&nbsp;{{product.description|truncatechars:20}}...</p>
+                        <p class="text-muted">
+                            &nbsp; Price: ${{product.price}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<hr>
+<section>
+    <div class="container my-5">
+        <header class="mb-4">
+            <h3>New products</h3>
+        </header>
+
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-2 col-md-6 col-sm-6">
+                <div class="card my-2 shadow-0">
+                    <a href="{{ product.get_absolute_url }}" class="">
+                        {% for image in product.product_images.all %}
+                        <img src="{{ image.image.url }}"
+                            class="card-img-top rounded-2 home_page_image" style="aspect-ratio: 1 / 1" />
+                        {% endfor %}
+                    </a>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-3">
+                                <h6 class=" badge bg-danger pt-1">
+                                    New
+                                </h6>
+                            </div>
+
+                            <div class="col-9 text-center">
+                                <h6 class="card-title">{{product.name}}</h6>
+                            </div>
+                        </div>
+
+                        <p class="card-text mb-0">{{product.description|truncatechars:10}}...</p>
+                        <p class="text-muted pt-2">
+                            Price: ${{product.price}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<hr>
+
+{% endblock content %}
