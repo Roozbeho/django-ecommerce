@@ -1,7 +1,5 @@
 {% include "base.html" %}
 
-{% comment %} {% block title %}Favorate Products{% endblock title %} {% endcomment %}
-
 {% block content %}
 <div class="container w-75 p-3"><br>
     <header class="mb-4">
@@ -43,32 +41,11 @@
                             </svg>
                         </button>
                     </a>
-                    {% comment %} <button id="remove-basket" value='{{ product.id }}'>
-                        Remove
-                    </button> {% endcomment %}
+
                 </div>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
-{% comment %} {% for product in favorite %}
-<h1><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h1>
-
-{% for image in product.product_images.all %}
-{% if image.is_cover %}
-<img src="{{ image.image.url }}" alt="" width="500">
-{% endif %}
-{% endfor %}
-
-<p>Price: ${{ product.price }}</p>
-
-<button type="submit">
-    <a href="{% url 'account:change_favorite' product.slug%}">Delete from Favorite</a>
-</button>
-
-<hr>
-
-{% endfor %} {% endcomment %}
-
 {% endblock content %}

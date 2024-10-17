@@ -1,8 +1,5 @@
 {% include "base.html" %}
 
-{% comment %} {% block title %}Basket{% endblock title %} {% endcomment %}
-
-
 {% block content %}
 
 <section class="h-100">
@@ -50,20 +47,6 @@
                 <button class='btn btn-outline-dark' id="update-basket" value='{{ product.id }}'>
                   Update
                 </button>
-
-                {% comment %} <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                  onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                  <i class="fas fa-minus"></i>
-                </button>
-
-                <input id="form1" min="0" name="quantity" value="2" type="number"
-                  class="form-control form-control-sm" />
-
-                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                  onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                  <i class="fas fa-plus"></i>
-                </button> {% endcomment %}
-
               </div>
               <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
                 <h5 class="mb-0">$ {{ item.price }}</h5>
@@ -78,9 +61,6 @@
                       d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
                   </svg>
                 </button> 
-                {% comment %} <button id="remove-basket" value='{{ product.id }}'>
-                  Remove
-                </button> {% endcomment %}
               </div>
             </div>
           </div>

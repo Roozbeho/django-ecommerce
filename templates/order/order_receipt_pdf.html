@@ -1,59 +1,57 @@
 {% load order_tags %}
 <html>
-    <body>
-        <div class="invoice-container">
-            <div class="invoice-header">
-                <h1>Order Receipt</h1>
-            </div>
-        
-            {% comment %} {% for order in orders %} {% endcomment %}
-        
-            <div class="invoice-details">
-                <p><strong>Customer Name:</strong> {{ order.fullname }}</p>
-                <p><strong>Address:</strong> {{ order.address_line_1 }} - {{ order.address_line_2 }}</p>
-                <p><strong>Order Date:</strong> {{ order.created_at|date:'H:i' }} - {{ order.created_at|date:'Y/m/d' }}</p>
-                <p><strong>Order Number:</strong> {{ order.id }}</p>
-            </div>
-        
-            <table class="invoice-items">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Total Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% comment %} {% for order in orders %} {% endcomment %}
-                    {% for item in order.orderitems.all %}
-                    <tr>
-                        <td>{{ item.product.name }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>$ {{ item.price }}</td>
-                        <td>$ {% multiply item.quantity item.price %}</td>
-                    </tr>
-                    {% endfor %}
-                    {% comment %} {% endfor %} {% endcomment %}
-                </tbody>
-            </table>
-        
-            <div class="invoice-total">
-                <div class="row">
-                    <div class="col text-start">
-                        <p><strong>Delivery Fee:</strong> $ {{ order.delivery_price }}</p>
-                        {% if order.coupon %}
-                        <p><strong>Coupon Discount:</strong> $ {{ order.discount_amount }}</p>
-                        {% endif %}
-                        <p><strong>Total Amount:</strong> $ {{ order.payments.total_price }}</p>
-                    </div>
+
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <h1>Order Receipt</h1>
+        </div>
+        <div class="invoice-details">
+            <p><strong>Customer Name:</strong> {{ order.fullname }}</p>
+            <p><strong>Address:</strong> {{ order.address_line_1 }} - {{ order.address_line_2 }}</p>
+            <p><strong>Order Date:</strong> {{ order.created_at|date:'H:i' }} - {{ order.created_at|date:'Y/m/d' }}</p>
+            <p><strong>Order Number:</strong> {{ order.id }}</p>
+        </div>
+
+        <table class="invoice-items">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% comment %} {% for order in orders %} {% endcomment %}
+                {% for item in order.orderitems.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>$ {{ item.price }}</td>
+                    <td>$ {% multiply item.quantity item.price %}</td>
+                </tr>
+                {% endfor %}
+                {% comment %} {% endfor %} {% endcomment %}
+            </tbody>
+        </table>
+
+        <div class="invoice-total">
+            <div class="row">
+                <div class="col text-start">
+                    <p><strong>Delivery Fee:</strong> $ {{ order.delivery_price }}</p>
+                    {% if order.coupon %}
+                    <p><strong>Coupon Discount:</strong> $ {{ order.discount_amount }}</p>
+                    {% endif %}
+                    <p><strong>Total Amount:</strong> $ {{ order.payments.total_price }}</p>
                 </div>
             </div>
-        
-            <div class="invoice-footer">
-                <p>Thank you for your purchase!</p>
-            </div>
-            {% comment %} {% endfor %} {% endcomment %}
         </div>
-    </body>
+
+        <div class="invoice-footer">
+            <p>Thank you for your purchase!</p>
+        </div>
+    </div>
+</body>
+
 </html>

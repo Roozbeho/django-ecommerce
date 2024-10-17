@@ -1,7 +1,5 @@
 {% include "base.html" %}
 
-{% block title %}Address{% endblock title %}
-
 {% block content %}
 <div class="container my-5">
     <h2 class="text-center mb-4">Your Addresses</h2>
@@ -51,42 +49,4 @@
 
     </form>
 </div>
-{% comment %}
-<hr>
-
-<button type="submit" value="Delete">
-    <a href="{% url 'account:create_address'%}">Add New Address</a>
-</button>
-
-<hr>
-
-{% for address in addresses %}
-{% if address.is_default %}
-<h1>its default address</h1>
-{% endif %}
-<p>fullname : {{ address.first_name }} {{ address.last_name }}</p>
-<p>phone number : {{ address.phone_number }}</p>
-<p>postal code : {{ address.postal_code }}</p>
-<p>state: {{ address.state }}</p>
-<p>address line 1 :{{ address.address_line_1 }}</p>
-<p>address line 2: {{ address.address_line_2 }}</p>
-{% if address.is_default %}
-<h3>its default address</h3>
-{% endif %}
-
-<button type="submit" value="Delete">
-    <a href="{% url 'account:delete_address' address.id %}">Delete</a>
-</button>
-<button type="submit" value="Delete">
-    <a href="{% url 'account:update_address' address.id %}">UpdateAddress</a>
-</button>
-{% if not address.is_default %}
-<button type="submit" value="Delete">
-    <a href="{% url 'account:set_default_address' address.id %}">set as a sefault Address</a>
-</button>
-{% endif %}
-<hr>
-
-{% endfor %} {% endcomment %}
-
 {% endblock content %}

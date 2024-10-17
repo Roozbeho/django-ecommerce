@@ -1,12 +1,7 @@
 {% include 'base.html' %}
 {% load static %}
 
-{% comment %} {% block title %}Home{% endblock title %}Home {% endcomment %}
-
 {% block content %}
-<!-- category -->
-
-<!-- Products -->
 <section>
     <div class="container my-5">
         <header class="mb-4 text-center">
@@ -34,12 +29,6 @@
                     </a>
                     <div class="card-body">
                         <div class="row">
-                            {% comment %} <div class="col-3">
-                                <h6 class=" badge bg-danger pt-1">
-                                    New
-                                </h6>
-                            </div> {% endcomment %}
-
                             <div class="col text-center">
                                 <h6 class="card-title">{{product.name}}</h6>
                             </div>
@@ -59,44 +48,6 @@
     {% endfor %}
 </section>
 <hr>
-<!-- Products -->
-
-<!-- Features -->
-{% comment %} <section>
-    <div class="container">
-        <div class="card p-4 bg-primary">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h4 class="mb-0 text-white">Best products and brands in store</h4>
-                    <p class="mb-0 text-white-50">Trendy products and text to build on the card title</p>
-                </div>
-                <div class="col-auto"><a class="btn btn-white text-primary shadow-0" href="#">Discover</a></div>
-            </div>
-        </div>
-    </div>
-</section> {% endcomment %}
-<!-- Features -->
-
-
-<!-- Products -->
-
-<!-- Features -->
-{% comment %} <section>
-    <div class="container">
-        <div class="card p-4 bg-primary">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h4 class="mb-0 text-white">Best products and brands in store</h4>
-                    <p class="mb-0 text-white-50">Trendy products and text to build on the card title</p>
-                </div>
-                <div class="col-auto"><a class="btn btn-white text-primary shadow-0" href="#">Discover</a></div>
-            </div>
-        </div>
-    </div>
-</section> {% endcomment %}
-<!-- Features -->
-
-
 {% endblock content %}
 
 

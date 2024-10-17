@@ -5,21 +5,6 @@
 <section style="background-color: #eee;">
     <div class="text-center container py-5">
         <h4 class="mt-4 mb-5"><strong>Product's in {{ subcategory_name.name }} section</strong></h4>
-
-        <!-- Sorting Form -->
-        {% comment %} <form method="get" class="mb-4">
-            <select name="sort" id="sort" onchange="this.form.submit()">
-                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
-                <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low to High
-                </option>
-                <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High to
-                    Low</option>
-                <option value="viewed" {% if request.GET.sort == 'viewed' %}selected{% endif %}>Most Viewed</option>
-                <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
-            </select>
-        </form> {% endcomment %}
-
-        <!-- Filters and Products Row -->
         <div class="row">
             <!-- Filters Section -->
             <div class="col-3">
@@ -35,7 +20,6 @@
                         <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
                     </select>
                     <br>
-                    <!-- Filter by Price -->
                     <div class="mb-4">
                         <h6>Price Range</h6>
                         <input type="number" name="min_price" placeholder="Min Price"
@@ -44,14 +28,11 @@
                             value="{{ request.GET.max_price }}" class="form-control">
                     </div>
 
-                    <!-- Filter by Availability -->
                     <div class="mb-4">
                         <h6>Availability</h6>
                         <label><input type="checkbox" name="in_stock" value="1"
                                 {% if request.GET.in_stock %}checked{% endif %}> In Stock</label>
                     </div>
-
-                    <!-- Filter by Rating -->
                     <div class="mb-4">
                         <h6>Rating</h6>
                         <select name="rating" class="form-control">
@@ -65,13 +46,9 @@
                         </select>
                         <br>
                     </div>
-
-                    <!-- Submit Button -->
                     <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
                 </form>
             </div>
-
-            <!-- Products Section -->
             <div class="col-9">
                 <div class="row">
                     {% for product in products %}

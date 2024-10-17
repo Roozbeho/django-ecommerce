@@ -1,7 +1,5 @@
 {% include "base.html" %}
 
-{% comment %} {% block title %}Log-in{% endblock title %} {% endcomment %}
-
 {% block content %}
 <br><br>
     {% if form.error %}
@@ -21,9 +19,3 @@
         </div>
     </div>
 {% endblock content %}
-
-{% comment %} <form method="post">
-    {% csrf_token %}
-    <h3>Are you sure want to logout? </h3>
-    <input type="submit" value="Logout">
-</form> {% endcomment %}
