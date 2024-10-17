@@ -1,0 +1,69 @@
+
+services:
+  rabbitmq:
+    image: public.ecr.aws/docker/library/rabbitmq:3.13.7-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  postgres:
+    image: public.ecr.aws/docker/library/postgres:16.4-alpine
+    container_name: Ecommerce_db
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+
+  django:
+    build:
+      context: ../ecommerce
+      dockerfile: Dockerfile
+    container_name: django
+    command: sh -c "python3 manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ../ecommerce:/usr/src/app/
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+  celery:
+    build:
+      context: ../ecommerce
+      dockerfile: Dockerfile
+    container_name: celery
+    command: celery -A ecommerce worker -l info
+    volumes:
+      - ../ecommerce:/usr/src/app/
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - django
+      - rabbitmq
+
+  celery-beat:
+    build:
+      context: ../ecommerce
+      dockerfile: Dockerfile
+    container_name: celery-beat
+    command: celery -A ecommerce beat -l info
+    volumes:
+      - ../ecommerce:/usr/src/app/
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - django
+      - celery
+
+volumes:
+  postgres_data:
