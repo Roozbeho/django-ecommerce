@@ -1,10 +1,10 @@
 from typing import Any
 from django.contrib import messages
-from django.db.models import F, OuterRef, Prefetch, Subquery, Q
+from django.db.models import OuterRef, Prefetch, Subquery, Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, ListView, CreateView
+from django.views.generic import ListView, CreateView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Category, Product, Sub_Category, Review, ProductImage
@@ -12,8 +12,6 @@ from .forms import ReviewForm
 from .tasks import increase_product_view
 from order.models import Order
 from account.views import VerificationAccountRequiredMixin
-
-# from django.core.cache import cache
 
 
 class HomeView(ListView):
@@ -32,28 +30,33 @@ class HomeView(ListView):
         return (
             super(HomeView, self)
             .get_queryset()
-            .prefetch_related(Prefetch("product_images", queryset=ProductImage.objects.filter(is_cover=True)))[:6]
+            .prefetch_related(
+                Prefetch(
+                    "product_images",
+                    queryset=ProductImage.objects.filter(is_cover=True),
+                )
+            )[:6]
         )
 
 
 class SearchProductView(View):
-    template_name = 'shop/search_products_result.html'
+    template_name = "shop/search_products_result.html"
 
     def get(self, request, *args, **kwargs):
 
-        search_query = request.GET.get('q')
-        
+        search_query = request.GET.get("q")
+
         if not search_query:
-            return redirect('/')
+            return redirect("/")
 
         products = Product.objects.filter(
-            Q(name__icontains=search_query) |
-            Q(slug__icontains=search_query) |
-            Q(sub_category__name__icontains=search_query) |
-            Q(sub_category__category__name__icontains=search_query)
-        ).prefetch_related(Prefetch('product_images', queryset=ProductImage.objects.filter(is_cover=True)))
-        page = request.GET.get('page', 1)
-        
+            Q(name__icontains=search_query)
+            | Q(slug__icontains=search_query)
+            | Q(sub_category__name__icontains=search_query)
+            | Q(sub_category__category__name__icontains=search_query)
+        ).prefetch_related(Prefetch("product_images", queryset=ProductImage.objects.filter(is_cover=True)))
+        page = request.GET.get("page", 1)
+
         paginator = Paginator(products, 8)
 
         try:
@@ -63,8 +66,7 @@ class SearchProductView(View):
         except EmptyPage:
             products = paginator.page(paginator.num_pages)
 
-        
-        return render(request, self.template_name, {'products': products})
+        return render(request, self.template_name, {"products": products})
 
 
 class CategoryView(View):
@@ -76,8 +78,7 @@ class CategoryView(View):
         )
 
         category = get_object_or_404(
-            Category.objects
-            .prefetch_related("subcategories")
+            Category.objects.prefetch_related("subcategories")
             .prefetch_related(
                 Prefetch(
                     "subcategories__products",
@@ -86,16 +87,14 @@ class CategoryView(View):
             )
             .prefetch_related(
                 Prefetch(
-                    "subcategories__products__product_images", queryset=ProductImage.objects.filter(is_cover=True)
+                    "subcategories__products__product_images",
+                    queryset=ProductImage.objects.filter(is_cover=True),
                 )
             ),
-            slug=category_slug
+            slug=category_slug,
         )
 
-        context = {
-            "category": category,
-            # "category_name": Category.objects.get(slug=category_slug),
-        }
+        context = {"category": category}
 
         return render(request, self.template_name, context)
 
@@ -111,44 +110,45 @@ class SubCategoriesView(ListView):
         return context
 
     def get_queryset(self):
-        if self.request.GET.get("sort") == "price_asc":
-            qs = Product.objects.filter_and_order(order_by="price", asc=True).filter(
-                sub_category__slug=self.kwargs["sub_category"]
-            )
-        elif self.request.GET.get("sort") == "price_desc":
-            qs = Product.objects.filter_and_order(order_by="price", asc=False).filter(
-                sub_category__slug=self.kwargs["sub_category"]
-            )
-        elif self.request.GET.get("sort") == "oldest":
-            qs = Product.objects.filter_and_order(order_by="created_time", asc=True).filter(
-                sub_category__slug=self.kwargs["sub_category"]
-            )
-        elif self.request.GET.get("sort") == "viewed":
-            qs = Product.objects.filter_and_order(order_by="viewed", asc=False).filter(
-                sub_category__slug=self.kwargs["sub_category"]
-            )
-        else:
-            qs = Product.objects.filter(sub_category__slug=self.kwargs["sub_category"])
+        queryset = Product.objects.filter(sub_category__slug=self.kwargs["sub_category"])
 
-        if self.request.GET.get('max_price'):
-            qs=qs.filter(price__lte=self.request.GET.get('max_price'))
-        
-        if self.request.GET.get('min_price'):
-            qs=qs.filter(price__gte=self.request.GET.get('min_price'))
+        ordering_filter_mapping = {
+            "price_asc": ("price", True),
+            "price_desc": ("price", False),
+            "oldest": ("created_time", False),
+            "newest": ("created_time", True),
+            "viewed": ("viewed", False),
+        }
 
-        if self.request.GET.get('in_stock'):
-            qs=qs.filter(is_active=True)
-        
+        ordering_filter = self.request.GET.get("sort")
+        if ordering_filter:
+            queryset = queryset.filter_and_order(
+                order_by=ordering_filter_mapping[ordering_filter][0],
+                asc=ordering_filter_mapping[ordering_filter][1],
+            )
 
-        return qs.prefetch_related(Prefetch("product_images", queryset=ProductImage.objects.filter(is_cover=True)))
+        try:
+            if self.request.GET.get("max_price"):
+                queryset = queryset.filter(price__lte=self.request.GET.get("max_price"))
 
+            if self.request.GET.get("min_price"):
+                queryset = queryset.filter(price__gte=self.request.GET.get("min_price"))
+
+            if self.request.GET.get("in_stock"):
+                queryset = queryset.filter(is_active=True)
+        except:
+            messages.warning(self.request, "Invalid filtering")
+
+        return queryset.prefetch_related(
+            Prefetch("product_images", queryset=ProductImage.objects.filter(is_cover=True))
+        )
 
 
 class ProductDetailView(ListView):
     # TODO: pepole also buys this :
     def dispatch(self, request, *args, **kwargs):
-        increase_product_view.delay(self.kwargs['slug'])
-        
+        increase_product_view.delay(self.kwargs["slug"])
+
         return super().dispatch(request, *args, **kwargs)
 
     context_object_name = "reviews"
@@ -159,10 +159,8 @@ class ProductDetailView(ListView):
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["product"] = get_object_or_404(
-            Product.objects
-            .prefetch_related("product_images")
-            .prefetch_related("productspecificationvalue_set")
-            , slug=self.kwargs["slug"]
+            Product.objects.prefetch_related("product_images").prefetch_related("productspecificationvalue_set"),
+            slug=self.kwargs["slug"],
         )
         return context
 
