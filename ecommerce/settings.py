@@ -24,12 +24,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     # Local
     "account.apps.AccountConfig",
     "shop.apps.ShopConfig",
     "basket.apps.BasketConfig",
     "coupon.apps.CouponConfig",
     "order.apps.OrderConfig",
+
     # Third-party
     "celery",
     "debug_toolbar",
@@ -61,7 +63,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "basket.context_processors.Basket_Length",
                 "shop.context_processors.Categories",
-                "shop.context_processors.SearchForm"
+                "shop.context_processors.SearchForm",
             ],
         },
     },
@@ -70,22 +72,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "ecommerce.wsgi.application"
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -111,8 +106,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = "static/"
-
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -129,21 +122,18 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 DEFAULT_EMAIL_FROM = os.getenv("DEFAULT_EMAIL_FROM")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-
 # Celery configuration
-CELERY_BROKER_URL = "amqp://guest:guest@localhost"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_TIMEZONE = "UTC"
 
+# Static files
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static/"
 
-# Add this in your settings.py file:
-# STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR /'static/'
-
+# Media files
 MEDIA_ROOT = BASE_DIR / "media/"
 MEDIA_URL = "/media/"
-
 
 # PAYPAl
 PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
