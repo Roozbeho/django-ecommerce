@@ -165,7 +165,7 @@ class Review(TimestampAbstract):
         ]
 
     @classmethod
-    def is_valid(self, customer, product):
+    def is_valid(cls, customer, product):
         """
         Check if the customer has already made a review or rating for the product.
 
